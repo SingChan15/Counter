@@ -8,9 +8,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
         :root {
+            /* 還原為原本的漸變顏色 */
             --background-start: #6DD5FA;
             --background-end: #FF758C;
-            --timer-bg: rgba(255, 255, 255, 0.1);
+            --timer-bg: rgba(255, 255, 255, 0.15); /* 稍微調高透明度以適應較亮的背景 */
             --text-color: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.2);
             --progress-bar-color: #ffffff;
@@ -22,13 +23,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background: linear-gradient(45deg, var(--background-start), var(--background-end));
             background-size: 400% 400%;
             animation: gradientAnimation 15s ease infinite;
             color: var(--text-color);
             overflow: hidden;
+            flex-direction: column; /* 讓容器和名言垂直排列 */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #star-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* 確保 canvas 在最底層 */
         }
 
         @keyframes gradientAnimation {
@@ -46,7 +59,10 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transform: scale(0.95);
+            opacity: 0;
             animation: fadeIn 1.5s forwards;
+            max-width: 500px;
+            width: 100%;
         }
 
         @keyframes fadeIn {
@@ -61,6 +77,7 @@
             font-size: 2.5rem;
             margin-bottom: 10px;
             letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 為文字增加輕微陰影以提高可讀性 */
         }
 
         p {
@@ -117,6 +134,18 @@
             display: none; /* Initially hidden */
         }
 
+        .quote-container {
+            margin-top: 40px;
+            padding: 0 20px;
+            max-width: 600px;
+            text-align: center;
+            font-style: italic;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeIn 1.5s 0.5s forwards; /* 延遲 0.5s 顯示 */
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2); /* 為名言增加陰影 */
+        }
+
         @media (max-width: 480px) {
             .countdown-container {
                 padding: 30px 20px;
@@ -132,11 +161,16 @@
             .timer-display {
                 font-size: 2.5rem;
             }
+            .quote-container {
+                margin-top: 30px;
+            }
         }
 
     </style>
 </head>
 <body>
+
+    <canvas id="star-canvas"></canvas>
 
     <div class="countdown-container">
         <h1>距離下班還有</h1>
@@ -150,16 +184,194 @@
                 </svg>
                 <div id="timer" class="timer-display">00:00:00</div>
             </div>
-            
-            </div>
+        </div>
         
         <div id="message"></div>
-
     </div>
 
+    <div id="quote-container" class="quote-container"></div>
+
     <script>
+        // --- 星空背景邏輯 ---
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let stars = [];
+        let numStars = 500;
+
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function updateStars() {
+            stars.forEach(star => {
+                star.x += star.vx;
+                star.y += star.vy;
+
+                if (star.x < 0 || star.x > canvas.width) star.vx = -star.vx;
+                if (star.y < 0 || star.y > canvas.height) star.vy = -star.vy;
+            });
+        }
+
+        function animateStars() {
+            drawStars();
+            updateStars();
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            createStars();
+        });
+
+        setCanvasSize();
+        createStars();
+        animateStars();
+
+        // --- 名言邏輯 ---
+        const quotes = [
+            "成功不是終點，失敗也非末日，最重要的是繼續前進的勇氣。",
+            "今日事，今日畢。",
+            "時間就像海綿裡的水，只要願擠，總還是有的。",
+            "你所浪費的今天，是昨天死去的人奢望的明天。",
+
+            "別等到明天，因為明天或許永遠不會來。",
+            "專注於當下，是你能給予未來的最好禮物。",
+            "每一次的努力，都是在為未來鋪路。",
+            "休息是為了走更長遠的路。",
+            "工作時全力以赴，休息時徹底放鬆。",
+            "別讓昨天佔據了你太多的今天。",
+            "最慢的步伐不是跬步，而是徘徊。",
+            "最快的腳步不是衝刺，而是堅持。",
+            "每天叫醒你的不是鬧鐘，而是夢想。",
+            "如果你不肯付出一時的努力去博取成功，那麼你可能就要用一生的耐心去忍受失敗。",
+            "偉大的工作，並非由力量，而是由堅持來完成的。",
+            "機會是留給準備好的人。",
+            "不要害怕慢慢成長，要害怕從未開始。",
+            "你的態度決定你的高度。",
+            "小小的改變，累積起來就是巨大的進步。",
+            "生活不在於等待風暴過去，而在於學會在雨中跳舞。",
+            "每一次日落，都是為下一次日出做準備。",
+
+            "當你真心渴望某樣東西時，整個宇宙都會聯合起來幫助你完成。",
+            "即使在最黑暗的時刻，也別忘了抬頭看看星星。",
+            "一天的價值，在於你如何使用它。",
+            "別低估了每天一點點進步的力量。",
+            "熱情是工作的靈魂。",
+            "簡單的事情重複做，你就是專家。",
+            "重複的事情用心做，你就是贏家。",
+            "心態對了，事就對了。",
+            "與其抱怨黑暗，不如點亮蠟燭。",
+            "世上沒有絕望的處境，只有對處境絕望的人。",
+            "每一次的挑戰，都是一次成長的機會。",
+            "保持好奇心，世界處處是驚喜。",
+            "學會放手，才能擁有更多。",
+            "感謝你今天所擁有的一切。",
+            "一個微笑，可以改變一整天。",
+            "分享你的知識，那是一種永恆的方式。",
+            "耐心是智慧的夥伴。",
+            "行動是治癒恐懼的良藥。",
+            "靈感，其實是 99% 的汗水。",
+            "做你熱愛的事，然後做到極致。",
+            "生活是一面鏡子，你對它笑，它就對你笑。",
+            "專注於目標，而不是障礙。",
+            "最好的報復，就是巨大的成功。",
+            "健康是最大的財富。",
+            "對自己好一點，那是會跟你一輩子的人。",
+            "真正的快樂，來自於內心的平靜。",
+            "每天都是一個新的開始。",
+            "犯錯是學習的必經之路。",
+            "保持謙虛，永遠有學習的空間。",
+            "今日的努力，是明日的幸運。",
+            "自律是成功的基石。",
+            "時間管理，就是生命管理。",
+            "別讓情緒控制你的決定。",
+            "溝通是解決問題的橋樑。",
+            "團隊合作，讓夢想走得更遠。",
+            "信任自己，你能做的比想像中更多。",
+            "每一次的付出，都不會白費。",
+            "懂得感恩，你會更快樂。",
+            "保持積極，好事自然會發生。",
+
+            "人生最大的成就是從失敗中站起來。",
+            "夢想，是給自己最好的承諾。",
+            "改變，從現在開始。",
+            "別只是看著時鐘，要像它一樣，不斷前進。",
+            "毅力可以征服任何挑戰。",
+            "知識是帶不走的財富。",
+            "閱讀，是與智者對話。",
+            "旅行，是為了遇見更好的自己。",
+            "運動，是投資健康最好的方式。",
+            "早睡早起，身體好。",
+            "吃得健康，活得精彩。",
+            "多喝水，保持活力。",
+            "深呼吸，釋放壓力。",
+            "冥想，讓心靈沉澱。",
+            "寫日記，記錄生活的美好。",
+            "學習新技能，讓自己增值。",
+            "整理房間，也整理心情。",
+            "幫助他人，快樂自己。",
+
+            "家庭是溫暖的港灣。",
+            "友情是人生的財富。",
+            "愛情需要經營與珍惜。",
+            "孝順是最好的回報。",
+            "誠信是做人的根本。",
+            "寬容待人，嚴格律己。",
+            "言出必行，行之有果。",
+            "保持童心，生活更有趣。",
+            "幽默感是生活的潤滑劑。",
+            "接受不完美，才是真正的完美。",
+
+            "活在當下，珍惜眼前。",
+            "放下過去，展望未來。",
+            "知足常樂，簡單是福。",
+            "人生如戲，全靠演技。",
+            "笑一笑，十年少。",
+            "辦法總比困難多。",
+            "船到橋頭自然直。",
+            "堅持就是勝利。",
+            "有志者，事竟成。",
+            "一分耕耘，一分收穫。"
+        ];
+
+        const quoteContainer = document.getElementById('quote-container');
+
+        function displayRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteContainer.textContent = `"${quotes[randomIndex]}"`;
+        }
+        
+        // 初始顯示一句，然後每分鐘更新一次
+        displayRandomQuote();
+        setInterval(displayRandomQuote, 60000); // 60000 毫秒 = 1 分鐘
+
+        // --- 倒數計時器邏輯 (原有程式碼) ---
         function updateCountdown() {
-            // 使用 Intl.DateTimeFormat 確保獲取香港時區的當前時間
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Hong_Kong"}));
 
             const startTime = new Date(now);
@@ -176,31 +388,25 @@
             const progressBar = document.getElementById('progressBar');
 
             if (now < startTime) {
-                // 8:45 前
                 timerVisual.style.display = 'none';
                 messageDiv.style.display = 'block';
                 messageDiv.textContent = '距離開始還有一段時間';
                 h1Title.textContent = '即將開始';
                 pSubTitle.textContent = '香港時間 08:45';
-
             } else if (now >= endTime) {
-                // 18:00 後
                 timerVisual.style.display = 'none';
                 messageDiv.style.display = 'block';
                 messageDiv.textContent = '好好休息，明天再見';
                 h1Title.textContent = '今日已結束';
                 pSubTitle.textContent = `每日 08:45 - 18:00`;
                 progressBar.style.strokeDashoffset = 691;
-
             } else {
-                // 倒數進行中
                 timerVisual.style.display = 'block';
                 messageDiv.style.display = 'none';
                 h1Title.textContent = '距離下班還有';
                 pSubTitle.textContent = '香港時間 18:00';
 
                 const totalSeconds = (endTime - now) / 1000;
-
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = Math.floor(totalSeconds % 60);
@@ -208,7 +414,6 @@
                 timerDisplay.textContent = 
                     `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 
-                // 更新進度條
                 const totalDuration = (endTime - startTime) / 1000;
                 const elapsed = (now - startTime) / 1000;
                 const progressPercentage = elapsed / totalDuration;
@@ -219,7 +424,6 @@
             }
         }
 
-        // 立即執行一次，然後每秒更新
         updateCountdown();
         setInterval(updateCountdown, 1000);
     </script>
