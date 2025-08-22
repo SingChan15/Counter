@@ -367,7 +367,7 @@
         // --- 倒數計時器邏輯 ---
         function updateCountdown() {
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Hong_Kong"}));
-            const day = now.getDay(); // 0 = 星期日, 6 = 星期六
+            const day = now.getDay(); // 0 = 星期日, 5 = 星期五, 6 = 星期六
 
             const startTime = new Date(now);
             startTime.setHours(8, 45, 0, 0);
@@ -398,10 +398,19 @@
             } else if (now >= endTime) {
                 timerVisual.style.display = 'none';
                 messageDiv.style.display = 'block';
-                messageDiv.textContent = '好好休息，明天再見';
-                h1Title.textContent = '今日已結束';
-                pSubTitle.textContent = `每日 08:45 - 18:00`;
+                
+                // 判斷是否為星期五下班後
+                if (day === 5) {
+                    h1Title.textContent = 'Happy Friday!';
+                    messageDiv.textContent = '週末開始啦！';
+                    pSubTitle.textContent = '好好放鬆一下';
+                } else {
+                    h1Title.textContent = '今日已結束';
+                    messageDiv.textContent = '好好休息，明天再見';
+                    pSubTitle.textContent = `每日 08:45 - 18:00`;
+                }
                 progressBar.style.strokeDashoffset = 691;
+
             } else {
                 // 工作日倒數進行中
                 timerVisual.style.display = 'block';
