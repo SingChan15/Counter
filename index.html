@@ -258,7 +258,6 @@
             "今日事，今日畢。",
             "時間就像海綿裡的水，只要願擠，總還是有的。",
             "你所浪費的今天，是昨天死去的人奢望的明天。",
-
             "別等到明天，因為明天或許永遠不會來。",
             "專注於當下，是你能給予未來的最好禮物。",
             "每一次的努力，都是在為未來鋪路。",
@@ -276,7 +275,6 @@
             "小小的改變，累積起來就是巨大的進步。",
             "生活不在於等待風暴過去，而在於學會在雨中跳舞。",
             "每一次日落，都是為下一次日出做準備。",
-
             "當你真心渴望某樣東西時，整個宇宙都會聯合起來幫助你完成。",
             "即使在最黑暗的時刻，也別忘了抬頭看看星星。",
             "一天的價值，在於你如何使用它。",
@@ -316,7 +314,6 @@
             "每一次的付出，都不會白費。",
             "懂得感恩，你會更快樂。",
             "保持積極，好事自然會發生。",
-
             "人生最大的成就是從失敗中站起來。",
             "夢想，是給自己最好的承諾。",
             "改變，從現在開始。",
@@ -335,7 +332,6 @@
             "學習新技能，讓自己增值。",
             "整理房間，也整理心情。",
             "幫助他人，快樂自己。",
-
             "家庭是溫暖的港灣。",
             "友情是人生的財富。",
             "愛情需要經營與珍惜。",
@@ -346,7 +342,6 @@
             "保持童心，生活更有趣。",
             "幽默感是生活的潤滑劑。",
             "接受不完美，才是真正的完美。",
-
             "活在當下，珍惜眼前。",
             "放下過去，展望未來。",
             "知足常樂，簡單是福。",
@@ -366,13 +361,13 @@
             quoteContainer.textContent = `"${quotes[randomIndex]}"`;
         }
         
-        // 初始顯示一句，然後每分鐘更新一次
         displayRandomQuote();
-        setInterval(displayRandomQuote, 60000); // 60000 毫秒 = 1 分鐘
+        setInterval(displayRandomQuote, 60000); 
 
-        // --- 倒數計時器邏輯 (原有程式碼) ---
+        // --- 倒數計時器邏輯 ---
         function updateCountdown() {
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Hong_Kong"}));
+            const day = now.getDay(); // 0 = 星期日, 6 = 星期六
 
             const startTime = new Date(now);
             startTime.setHours(8, 45, 0, 0);
@@ -387,7 +382,14 @@
             const pSubTitle = document.getElementById('target-time');
             const progressBar = document.getElementById('progressBar');
 
-            if (now < startTime) {
+            // 優先判斷是否為週末
+            if (day === 0 || day === 6) {
+                timerVisual.style.display = 'none';
+                messageDiv.style.display = 'block';
+                messageDiv.textContent = '週末愉快！';
+                h1Title.textContent = '週末時間';
+                pSubTitle.textContent = '好好享受你的假期';
+            } else if (now < startTime) {
                 timerVisual.style.display = 'none';
                 messageDiv.style.display = 'block';
                 messageDiv.textContent = '距離開始還有一段時間';
@@ -401,6 +403,7 @@
                 pSubTitle.textContent = `每日 08:45 - 18:00`;
                 progressBar.style.strokeDashoffset = 691;
             } else {
+                // 工作日倒數進行中
                 timerVisual.style.display = 'block';
                 messageDiv.style.display = 'none';
                 h1Title.textContent = '距離下班還有';
